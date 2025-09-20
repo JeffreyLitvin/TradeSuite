@@ -1,4 +1,5 @@
 #include <iostream>
+#include "CubbyMenu.hpp"
 #include <cxxopts/cxxopts.hpp>
 
 int main(int argc, char *argv[])
@@ -27,4 +28,16 @@ int main(int argc, char *argv[])
      }
 
     std::cout << "Test done" <<  std::endl;
+
+    CubbyMenu::Menu menu;
+
+    bool loop = true;
+
+    menu.add_item("Option 1", []() { std::cout << "Option 0 is called!\n"; });
+    menu.add_item("Exit", [&loop]() { loop = false; });
+
+    while(loop)
+    {
+        menu.print();
+    }
 }
