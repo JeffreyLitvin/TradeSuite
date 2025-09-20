@@ -69,7 +69,7 @@ class Menu
 
         for (std::size_t i = 0; i < m_items.size(); ++i)
         {
-            std::cout << i << ". " << m_items[i].get_title() << '\n';
+            std::cout << i + 1 << ". " << m_items[i].get_title() << '\n';
         }
 
         while (true)
@@ -79,7 +79,7 @@ class Menu
 
             try
             {
-                converted_option = std::stoi(option);
+                converted_option = std::stoi(option) - 1;
             }
             catch (...)
             {

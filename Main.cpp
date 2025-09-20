@@ -7,9 +7,10 @@
 
 int main(int argc, char *argv[])
 {
-    cxxopts::Options options("TradeEntry", "Testing how cxxopts works");
+    cxxopts::Options options("TradeEntry", "Enter trade program");
     options.add_options()
         ("f,file", "File name", cxxopts::value<std::string>())
+        ("s,sym", "Symbol", cxxopts::value<std::string>())
         ("h,help", "Print usage")
         ;
     auto result = options.parse(argc, argv);
@@ -19,24 +20,36 @@ int main(int argc, char *argv[])
       std::cout << options.help() << std::endl;
       exit(0);
     }
-     if (result.count("file"))
-     {
-         std::string f = result["file"].as<std::string>();
-         std::cout << "File given is " << f << std::endl;
-     }
-     else
-     {
-         std::cout << "File argument required!" << std::endl;
-         exit(0);
-     }
+    std::string file;
+    if (result.count("file"))
+    {
+        file = result["file"].as<std::string>();
+    }
+    else
+    {
+        std::cout << "File argument required!" << std::endl;
+        std::cout << options.help() << std::endl;
+        exit(0);
+    }
 
-    std::cout << "Test done" <<  std::endl;
+    std::string sym;
+    if (result.count("sym"))
+    {
+        sym = result["sym"].as<std::string>();
+    }
+    else
+    {
+        std::cout << "sym argument required!" << std::endl;
+        std::cout << options.help() << std::endl;
+        exit(0);
+    }
 
     CubbyMenu::Menu menu;
+    menu.add_header("TradeEntry");
 
     bool loop = true;
 
-    menu.add_item("Option 1", []() { std::cout << "Option 0 is called!\n"; });
+    menu.add_item("Add a trade", []() { std::cout << "Implment enter a trade!\n"; });
     menu.add_item("Exit", [&loop]() { loop = false; });
 
     while(loop)
@@ -66,7 +79,7 @@ int main(int argc, char *argv[])
     t.pnl       = 1500;
 
     std::stringstream rmultiple;
-    rmultiple << std::fixed << std::setprecision(1) << static_cast<double>(t.pnl) / static_cast<double>(t.risk);
+    rmultiple << std::fixed << std::setprecision(2) << static_cast<double>(t.pnl) / static_cast<double>(t.risk);
 
     std::cout << t.tradeDate << "," 
               << t.sym  << "," 
