@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include "CubbyMenu.hpp"
 #include "Trade.hpp"
@@ -18,7 +19,7 @@ class MenuMgr
 
     public:
     void addTrade();
-    void writeTrades();
+    void writeTrades(std::string tradeFile);
 
 };
 
@@ -62,17 +63,27 @@ int main(int argc, char *argv[])
         menu.print();
     }
 
-    m.writeTrades();
+    m.writeTrades(file);
 }
 
-void MenuMgr::writeTrades()
+void MenuMgr::writeTrades(std::string file)
 {
+    std::ofstream outfile(file, std::ios::app);
+
+    // Check if the file was successfully opened
+    if (!outfile.is_open())
+    {
+        std::cerr << "Unable to open file " << file <<  std::endl;
+        return;
+    }
+
     for(Trade t : _trades)
     {
         std::stringstream rmultiple;
         rmultiple << std::fixed << std::setprecision(2) << static_cast<double>(t.pnl) / static_cast<double>(t.risk);
 
-        std::cout << t.sym << ","
+        std::stringstream csv;
+        csv       << t.sym << ","
                   << t.openDate << ","
                   << t.longTrade << ","
                   << t.withTrend << ","
@@ -82,8 +93,15 @@ void MenuMgr::writeTrades()
                   << t.pnl << ","
                   << rmultiple.str()
                   << std::endl;
+
+        outfile   << csv.str();
+        std::cout << csv.str();
     }
+
+    std::cout << std::endl;
+    std::cout << "Recorded " << _trades.size() << " trades" << std::endl;
 }
+
 void MenuMgr::addTrade()
 {
     Trade t;
