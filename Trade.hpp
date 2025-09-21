@@ -3,7 +3,6 @@
 struct Trade
 {
     std::string sym; 
-    std::string tradeDate; 
     bool longTrade;
     bool withTrend;
     std::string openDate; 

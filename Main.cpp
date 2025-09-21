@@ -1,16 +1,32 @@
 #include <iostream>
+#include <vector>
 #include "CubbyMenu.hpp"
 #include "Trade.hpp"
 #include <cxxopts/cxxopts.hpp>
 
 #include <ctime>
 
+void addTrade();
+
+class MenuMgr
+{
+    private:
+    std::vector<Trade> _trades;
+    bool isLongTrade();
+    bool isWithTrend();
+    std::string tradeType();
+
+    public:
+    void addTrade();
+    void writeTrades();
+
+};
+
 int main(int argc, char *argv[])
 {
     cxxopts::Options options("TradeEntry", "Enter trade program");
     options.add_options()
         ("f,file", "File name", cxxopts::value<std::string>())
-        ("s,sym", "Symbol", cxxopts::value<std::string>())
         ("h,help", "Print usage")
         ;
     auto result = options.parse(argc, argv);
@@ -32,24 +48,13 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
-    std::string sym;
-    if (result.count("sym"))
-    {
-        sym = result["sym"].as<std::string>();
-    }
-    else
-    {
-        std::cout << "sym argument required!" << std::endl;
-        std::cout << options.help() << std::endl;
-        exit(0);
-    }
-
     CubbyMenu::Menu menu;
     menu.add_header("TradeEntry");
 
+    MenuMgr m;
     bool loop = true;
 
-    menu.add_item("Add a trade", []() { std::cout << "Implment enter a trade!\n"; });
+    menu.add_item("Add a trade", [&m]() {m.addTrade();});
     menu.add_item("Exit", [&loop]() { loop = false; });
 
     while(loop)
@@ -57,39 +62,76 @@ int main(int argc, char *argv[])
         menu.print();
     }
 
-     std::time_t currentTime = std::time(0); 
+    m.writeTrades();
+}
 
-    // Convert the time_t object to a tm structure for local time
-    std::tm* localTime = std::localtime(&currentTime);
+void MenuMgr::writeTrades()
+{
+    for(Trade t : _trades)
+    {
+        std::stringstream rmultiple;
+        rmultiple << std::fixed << std::setprecision(2) << static_cast<double>(t.pnl) / static_cast<double>(t.risk);
 
-    // Extract date components from the tm structure
-    int year = localTime->tm_year + 1900; // tm_year is years since 1900
-    int month = localTime->tm_mon + 1;    // tm_mon is months since January (0-11)
-    int day = localTime->tm_mday;         // tm_mday is day of the month (1-31)
-
+        std::cout << t.sym << ","
+                  << t.openDate << ","
+                  << t.longTrade << ","
+                  << t.withTrend << ","
+                  << t.tradeType << ","
+                  << t.risk << ","
+                  << t.closeDate << ","
+                  << t.pnl << ","
+                  << rmultiple.str()
+                  << std::endl;
+    }
+}
+void MenuMgr::addTrade()
+{
     Trade t;
-    t.tradeDate = std::to_string(year) + "-" + std::to_string(month) + "-" + std::to_string(day);
-    t.sym       = "NVDA";
-    t.openDate  = "2025-09-15";
-    t.longTrade = true;
-    t.withTrend = true;
-    t.tradeType = "TRBO";
-    t.risk      = 2100;
-    t.closeDate = "2025-09-19";
-    t.pnl       = 1500;
 
-    std::stringstream rmultiple;
-    rmultiple << std::fixed << std::setprecision(2) << static_cast<double>(t.pnl) / static_cast<double>(t.risk);
+    std::cout << "Symbol: "; std::cin >> t.sym; 
+    std::cout << "OpenDate (YYYY-MM-DDDD): "; std::cin >> t.openDate; 
+    t.longTrade = isLongTrade();
+    t.withTrend = isWithTrend();
+    t.tradeType = tradeType();
+    std::cout << "Risk: "; std::cin >> t.risk; 
+    std::cout << "CloseDate (YYYY-MM-DDDD): "; std::cin >> t.closeDate; 
+    std::cout << "PnL: "; std::cin >> t.pnl; 
 
-    std::cout << t.tradeDate << "," 
-              << t.sym  << "," 
-              << t.openDate  << "," 
-              << t.longTrade  << "," 
-              << t.withTrend  << "," 
-              << t.tradeType  << "," 
-              << t.risk  << "," 
-              << t.closeDate  << "," 
-              << t.pnl  << "," 
-              << rmultiple.str() 
-              << std::endl;
+    _trades.push_back(t);
+}
+
+bool MenuMgr::isLongTrade()
+{
+    CubbyMenu::Menu menu;
+    bool isLong;
+    menu.add_item("Long", [&isLong]() {isLong = true;});
+    menu.add_item("Short", [&isLong]() {isLong = false;});
+    menu.print();
+
+    return isLong;
+}
+
+bool MenuMgr::isWithTrend()
+{
+    CubbyMenu::Menu menu;
+    bool b;
+    menu.add_item("With trend", [&b]() {b = true;});
+    menu.add_item("Counter trend", [&b]() {b = false;});
+    menu.print();
+
+    return b;
+}
+
+std::string MenuMgr::tradeType()
+{
+    CubbyMenu::Menu menu;
+    std::string s;
+    menu.add_item("Trading Range Break Out", [&s]() {s = "TRBO";});
+    menu.add_item("Trading Range Buy Low Sell High", [&s]() {s = "TRBLSH";});
+    menu.add_item("Broad Channel Break Out", [&s]() {s = "BCBO";});
+    menu.add_item("Broad Channel Buy Low Sell High", [&s]() {s = "BCBLSH";});
+    menu.add_item("Major/Minor Trend Reversal", [&s]() {s = "MTR";});
+    menu.print();
+
+    return s;
 }
