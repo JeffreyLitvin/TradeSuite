@@ -1,3 +1,3 @@
 cmake -B build
 cmake --build build
-build/TradeEntry -f test
+build/TradeEntry -f ~/data/2025/demo_trade_entry_2025.csv
