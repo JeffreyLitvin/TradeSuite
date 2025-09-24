@@ -20,6 +20,7 @@ class MenuMgr
     public:
     void addTrade();
     void writeTrades(std::string tradeFile);
+    std::string getDate(std::string label);
 
 };
 
@@ -107,15 +108,27 @@ void MenuMgr::addTrade()
     Trade t;
 
     std::cout << "Symbol: "; std::cin >> t.sym; 
-    std::cout << "OpenDate (YYYY-MM-DDDD): "; std::cin >> t.openDate; 
+    t.openDate = getDate("OpenDate");
     t.longTrade = isLongTrade();
     t.withTrend = isWithTrend();
     t.tradeType = tradeType();
     std::cout << "Risk: "; std::cin >> t.risk; 
-    std::cout << "CloseDate (YYYY-MM-DDDD): "; std::cin >> t.closeDate; 
+    t.closeDate = getDate("CloseDate");
     std::cout << "PnL: "; std::cin >> t.pnl; 
 
     _trades.push_back(t);
+}
+
+std::string MenuMgr::getDate(std::string label)
+{
+    std::stringstream date;
+
+    std::string input;
+    std::cout << label << " year (YYYY) : " ; std::cin >> input; date << input << "-";
+    std::cout << label << " month (MM)  : " ; std::cin >> input; date << input << "-";
+    std::cout << label << " day (DD)    : " ; std::cin >> input; date << input;
+
+    return date.str();
 }
 
 bool MenuMgr::isLongTrade()
