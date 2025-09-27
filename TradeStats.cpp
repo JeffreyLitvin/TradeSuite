@@ -5,6 +5,12 @@
 #include <cxxopts/cxxopts.hpp>
 #include "csv.h"
 #include "ascii/ascii.h"
+#include "fort.hpp"
+#include <cmath>
+
+double two_decimals(double value) {
+    return std::trunc(value * 100.0) / 100.0;
+}
 
 int main(int argc, char *argv[])
 {
@@ -36,12 +42,13 @@ int main(int argc, char *argv[])
     mgr.readTradeFile(file);
 
     const auto& stats = mgr.getTradeStats("ALL");
-    std::cout << stats.getLabel() << " total_trades=" << stats.getTotalTrades()
-                                  << " win_pct=" << stats.getWinPct()
-                                  << std::fixed << std::setprecision(2) << " total_r=" << stats.getRunningR()
-                                  << std::endl;
-    
     ascii::Asciichart asciichart({{"ALLTRADEs", mgr.getTradeStats("ALL").getTradesAsSeries()}});
     std::cout << asciichart.Plot() << std::endl;
+
+    fort::char_table table;
+    table << fort::header
+        << "Trade Type"         << "Total Trades"           << "Win Pct"            << "Total R"                            << fort::endr
+        << "ALL"                << stats.getTotalTrades()   << stats.getWinPct()    << two_decimals(stats.getRunningR())    << fort::endr;
+    std::cout << table.to_string() << std::endl;
 
 }
