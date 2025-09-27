@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
 
     const auto& stats = mgr.getTradeStats("ALL");
     std::cout << stats.getLabel() << " total_trades=" << stats.getTotalTrades()
-                                  << " win_pct=" <<  stats.getWinPct()
-                                  << " total_r=" << stats.getRunningR()
+                                  << " win_pct=" << stats.getWinPct()
+                                  << std::fixed << std::setprecision(2) << " total_r=" << stats.getRunningR()
                                   << std::endl;
     
     ascii::Asciichart asciichart({{"ALLTRADEs", mgr.getTradeStats("ALL").getTradesAsSeries()}});
