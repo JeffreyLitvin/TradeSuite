@@ -27,7 +27,7 @@ class TradeStats
     int getTotalTrades()   const  { return _tradeR.size();}
     double getRunningR()      const  { return _runningR;}
     int getWins()          const  { return _wins;}
-    double getWinPct() const
+    int getWinPct() const
     {
         return (static_cast<double>(getWins()) / static_cast<double>(getTotalTrades())) * 100;  
     }

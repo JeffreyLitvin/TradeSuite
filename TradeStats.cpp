@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
     const auto& stats = mgr.getTradeStats("ALL");
     std::cout << stats.getLabel() << " total_trades=" << stats.getTotalTrades()
-                                  << " win_pct=" <<  std::fixed << std::setprecision(2) << stats.getWinPct()
+                                  << " win_pct=" <<  stats.getWinPct()
                                   << " total_r=" << stats.getRunningR()
                                   << std::endl;
     

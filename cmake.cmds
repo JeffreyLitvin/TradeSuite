@@ -4,4 +4,7 @@ cmake --build build
 ~/bin/TradeEntry -f ~/data/2025/demo_trade_entry_2025.csv
 build/TradeEntry -f ~/data/2025/demo_trade_entry_2025.csv
 
+~/bin/TradeStats -f ~/data/2025/demo_trade_entry_2025.csv
+build/TradeStats -f ~/data/2025/demo_trade_entry_2025.csv
+
  cat  ~/data/2025/demo_trade_entry_2025.csv | cut -d ',' -f 9 | paste -s -d'+' | bc
