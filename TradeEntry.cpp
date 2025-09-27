@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <limits>   // Required for std::numeric_limits
 #include <vector>
 #include "CubbyMenu.hpp"
 #include "Trade.hpp"
@@ -123,10 +124,67 @@ std::string MenuMgr::getDate(std::string label)
 {
     std::stringstream date;
 
-    std::string input;
-    std::cout << label << " year (YYYY) : " ; std::cin >> input; date << input << "-";
-    std::cout << label << " month (MM)  : " ; std::cin >> input; date << input << "-";
-    std::cout << label << " day (DD)    : " ; std::cin >> input; date << input;
+
+    bool goodDate = false;
+    while(!goodDate)
+    {
+        int i;
+        std::cout << label << " year (YYYY) : ";
+        std::cin >> i;
+        if(std::cin.fail())
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+
+        if(i > 2000 && i < 2025)
+        {
+            date << i << "-";
+            goodDate = true;
+        }
+    }
+
+    goodDate = false;
+    while(!goodDate)
+    {
+        int i;
+        std::cout << label << " month (MM)  : ";
+        std::cin >> i;
+        if(std::cin.fail())
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+
+        if(i > 0 && i < 13)
+        {
+            date << std::setw(2) << std::setfill('0') << i << "-";
+            goodDate = true;
+        }
+    }
+
+    goodDate = false;
+    while(!goodDate)
+    {
+        int i;
+        std::cout << label << " day (DD)    : ";
+        std::cin >> i;
+        if(std::cin.fail())
+        {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+
+        if(i > 0 && i < 32)
+        {
+            date << std::setw(2) << std::setfill('0') << i;
+            goodDate = true;
+        }
+    }
+
 
     return date.str();
 }
