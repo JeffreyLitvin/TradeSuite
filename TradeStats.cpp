@@ -8,8 +8,11 @@
 #include "fort.hpp"
 #include <cmath>
 
-double two_decimals(double value) {
-    return std::trunc(value * 100.0) / 100.0;
+std::string two_decimals(double value) {
+    std::stringstream str;
+    str << std::fixed << std::setprecision(2) << value;
+
+    return str.str(); 
 }
 
 int main(int argc, char *argv[])
@@ -42,13 +45,21 @@ int main(int argc, char *argv[])
     mgr.readTradeFile(file);
 
     const auto& stats = mgr.getTradeStats("ALL");
-    ascii::Asciichart asciichart({{"ALLTRADEs", mgr.getTradeStats("ALL").getTradesAsSeries()}});
+    ascii::Asciichart asciichart({{"ALLTRADES", mgr.getTradeStats("ALL").getTradesAsSeries()}});
     std::cout << asciichart.Plot() << std::endl;
 
     fort::char_table table;
-    table << fort::header
-        << "Trade Type"         << "Total Trades"           << "Win Pct"            << "Total R"                            << fort::endr
-        << "ALL"                << stats.getTotalTrades()   << stats.getWinPct()    << two_decimals(stats.getRunningR())    << fort::endr;
+    table << fort::header << "Trade Type" << "Total Trades" << "Win Pct" << "R/Trade" << "Total R"  << fort::endr;
+    mgr.forEachTradeType([&table](const TradeStats &stats)
+        { 
+            if(stats.getTotalTrades() < 10)
+            {
+                return;
+            }
+            double rPerTrade = stats.getRunningR() / stats.getTotalTrades();
+            table << stats.getLabel() << stats.getTotalTrades() << stats.getWinPct() << two_decimals(rPerTrade) << two_decimals(stats.getRunningR()) << fort::endr;
+        });
+
     std::cout << table.to_string() << std::endl;
 
 }

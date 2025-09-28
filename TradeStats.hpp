@@ -1,6 +1,7 @@
  #pragma once
 
 #include <string>
+#include <map>
 #include <fstream>
 #include "csv.h"
 #include "Trade.hpp"
@@ -67,6 +68,29 @@ class TradeStatManager
     {
         double r = static_cast<double>(t.pnl) / static_cast<double>(t.risk);
         _allTrades.addTrade(r);
+
+        std::string tradeType;
+        if(t.longTrade)
+        {
+            tradeType += "Long";
+        }
+        else
+        {
+            tradeType += "Short";
+        }
+
+        if(t.withTrend)
+        {
+            tradeType += "WithTrend";
+        }
+        else
+        {
+            tradeType += "CounterTrend";
+        }
+
+        tradeType += t.tradeType;
+        auto [it, inserted] = _tradeTypes.try_emplace(tradeType, TradeStats(tradeType)); 
+        it->second.addTrade(r);
     }
 
     const TradeStats& getTradeStats(const std::string& label)
@@ -74,6 +98,18 @@ class TradeStatManager
         return _allTrades;
     }
 
+    template<typename Func>
+    void forEachTradeType(Func fn)
+    {
+        fn(_allTrades);
+
+        for (const auto& pair : _tradeTypes) 
+        {
+            fn(pair.second);
+        }
+    }
+
     private:
     TradeStats _allTrades{"ALL"};
+    std::map<std::string, TradeStats> _tradeTypes;
 };
