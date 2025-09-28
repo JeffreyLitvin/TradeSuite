@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
     cxxopts::Options options("TradeStats", "Produces trade stats");
     options.add_options()
         ("f,file", "File name", cxxopts::value<std::string>())
+        ("a,all", "Show all trades")
         ("h,help", "Print usage")
         ;
     auto result = options.parse(argc, argv);
@@ -41,6 +42,8 @@ int main(int argc, char *argv[])
         exit(0);
     }
 
+    bool showAll = result.count("all");
+
     TradeStatManager mgr;
     mgr.readTradeFile(file);
 
@@ -50,11 +53,14 @@ int main(int argc, char *argv[])
 
     fort::char_table table;
     table << fort::header << "Trade Type" << "Total Trades" << "Win Pct" << "R/Trade" << "Total R"  << fort::endr;
-    mgr.forEachTradeType([&table](const TradeStats &stats)
+    mgr.forEachTradeType([&table, showAll](const TradeStats &stats)
         { 
-            if(stats.getTotalTrades() < 10)
+            if(!showAll)
             {
-                return;
+                if (stats.getTotalTrades() < 10)
+                {
+                    return;
+                }
             }
             double rPerTrade = stats.getRunningR() / stats.getTotalTrades();
             table << stats.getLabel() << stats.getTotalTrades() << stats.getWinPct() << two_decimals(rPerTrade) << two_decimals(stats.getRunningR()) << fort::endr;
