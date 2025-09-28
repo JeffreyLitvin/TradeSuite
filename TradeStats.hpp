@@ -101,8 +101,6 @@ class TradeStatManager
     template<typename Func>
     void forEachTradeType(Func fn)
     {
-        fn(_allTrades);
-
         for (const auto& pair : _tradeTypes) 
         {
             fn(pair.second);

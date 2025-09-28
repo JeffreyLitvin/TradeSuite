@@ -7,6 +7,7 @@
 #include "ascii/ascii.h"
 #include "fort.hpp"
 #include <cmath>
+#include <set>
 
 std::string two_decimals(double value) {
     std::stringstream str;
@@ -51,20 +52,43 @@ int main(int argc, char *argv[])
     ascii::Asciichart asciichart({{"ALLTRADES", mgr.getTradeStats("ALL").getTradesAsSeries()}});
     std::cout << asciichart.Plot() << std::endl;
 
+    auto tsCompare = [](const TradeStats &a, const TradeStats &b)
+    {
+        double aR = a.getRunningR() / a.getTotalTrades();
+        double bR = b.getRunningR() / b.getTotalTrades();
+
+        return aR > bR;
+    };
+
     fort::char_table table;
     table << fort::header << "Trade Type" << "Total Trades" << "Win Pct" << "R/Trade" << "Total R"  << fort::endr;
-    mgr.forEachTradeType([&table, showAll](const TradeStats &stats)
+
+    {
+        const auto &allTrades = mgr.getTradeStats("ALL");
+        double rPerTrade = stats.getRunningR() / stats.getTotalTrades();
+        table << stats.getLabel() << stats.getTotalTrades() << stats.getWinPct() << two_decimals(rPerTrade) << two_decimals(stats.getRunningR()) << fort::endr;
+    }
+
+    std::set<TradeStats, decltype(tsCompare)> tsSet(tsCompare);
+    
+    mgr.forEachTradeType([&tsSet](const TradeStats &stats)
         { 
-            if(!showAll)
-            {
-                if (stats.getTotalTrades() < 10)
-                {
-                    return;
-                }
-            }
-            double rPerTrade = stats.getRunningR() / stats.getTotalTrades();
-            table << stats.getLabel() << stats.getTotalTrades() << stats.getWinPct() << two_decimals(rPerTrade) << two_decimals(stats.getRunningR()) << fort::endr;
+            tsSet.insert(stats);
         });
+
+
+    for(const auto& stats : tsSet)
+    {
+        if (!showAll)
+        {
+            if (stats.getTotalTrades() < 10)
+            {
+                continue;
+            }
+        }
+        double rPerTrade = stats.getRunningR() / stats.getTotalTrades();
+        table << stats.getLabel() << stats.getTotalTrades() << stats.getWinPct() << two_decimals(rPerTrade) << two_decimals(stats.getRunningR()) << fort::endr;
+    };
 
     std::cout << table.to_string() << std::endl;
 
