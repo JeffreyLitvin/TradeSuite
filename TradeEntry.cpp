@@ -17,6 +17,9 @@ class MenuMgr
     bool isLongTrade();
     bool isWithTrend();
     std::string tradeType();
+    void trade2CSV(std::ostream& os, const Trade& t);
+
+
 
     public:
     void addTrade();
@@ -81,10 +84,23 @@ void MenuMgr::writeTrades(std::string file)
 
     for(Trade t : _trades)
     {
+        std::stringstream csv;
+        trade2CSV(csv, t);
+        csv << std::endl;
+
+        outfile   << csv.str();
+        std::cout << csv.str();
+    }
+
+    std::cout << std::endl;
+    std::cout << "Recorded " << _trades.size() << " trades" << std::endl;
+}
+
+void MenuMgr::trade2CSV(std::ostream &csv, const Trade &t)
+{
         std::stringstream rmultiple;
         rmultiple << std::fixed << std::setprecision(2) << static_cast<double>(t.pnl) / static_cast<double>(t.risk);
 
-        std::stringstream csv;
         csv       << t.sym << ","
                   << t.openDate << ","
                   << t.longTrade << ","
@@ -93,15 +109,7 @@ void MenuMgr::writeTrades(std::string file)
                   << t.risk << ","
                   << t.closeDate << ","
                   << t.pnl << ","
-                  << rmultiple.str()
-                  << std::endl;
-
-        outfile   << csv.str();
-        std::cout << csv.str();
-    }
-
-    std::cout << std::endl;
-    std::cout << "Recorded " << _trades.size() << " trades" << std::endl;
+                  << rmultiple.str();
 }
 
 void MenuMgr::addTrade()
@@ -117,7 +125,20 @@ void MenuMgr::addTrade()
     t.closeDate = getDate("CloseDate");
     std::cout << "PnL: "; std::cin >> t.pnl; 
 
-    _trades.push_back(t);
+    bool goodTrade = false;
+
+    CubbyMenu::Menu menu;
+    std::stringstream tradecsv;
+    trade2CSV(tradecsv, t);
+    std::cout << tradecsv.str() << std::endl;
+    menu.add_item("Confirm trade", [&goodTrade]() {goodTrade = true;});
+    menu.add_item("Discard trade", [&goodTrade]() {goodTrade = false;});
+    menu.print();
+
+    if(goodTrade)
+    {
+        _trades.push_back(t);
+    }
 }
 
 std::string MenuMgr::getDate(std::string label)
