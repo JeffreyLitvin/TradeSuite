@@ -57,7 +57,18 @@ int main(int argc, char *argv[])
         double aR = a.getRunningR() / a.getTotalTrades();
         double bR = b.getRunningR() / b.getTotalTrades();
 
-        return aR > bR;
+        if(aR == bR && a.getRunningR() == b.getRunningR())
+        {
+            return a.getLabel() < b.getLabel();
+        }
+        else if(aR = bR)
+        {
+            return a.getRunningR() > b.getRunningR();
+        }
+        else
+        {
+            return aR > bR;
+        }
     };
 
     fort::char_table table;
