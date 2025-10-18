@@ -11,7 +11,9 @@ class TradeStats
     public:
 
     TradeStats(std::string label) : _label(label)
-    { }
+    {}
+
+    std::string getLabel() const { return _label;}
 
     void addTrade(double r)
     {
@@ -24,7 +26,6 @@ class TradeStats
         _tradeR.push_back(_runningR);
     }
 
-    std::string getLabel() const  { return _label;}
     int getTotalTrades()   const  { return _tradeR.size();}
     double getRunningR()      const  { return _runningR;}
     int getWins()          const  { return _wins;}
@@ -40,6 +41,44 @@ class TradeStats
     std::vector<double> _tradeR;
     int _wins        = 0;
     double _runningR    = 0;
+
+};
+
+class Trades
+{
+    public:
+
+    Trades(std::string label) : _label(label)
+    { }
+
+    std::string getLabel()const { return _label;}
+
+    void addTrade(double r)
+    {
+        _trades.push_back(r);
+    }
+
+    TradeStats getStats(int xMostRecent) const
+    {
+        int ndx = 0;
+        if(xMostRecent <= _trades.size())
+        {
+            ndx = _trades.size() - xMostRecent;
+        }
+
+        TradeStats ts(_label);
+        for(; ndx < _trades.size(); ++ndx)
+        {
+            ts.addTrade(_trades.at(ndx));
+        }
+
+        return ts;
+    }
+
+
+    private:
+    std::string _label;
+    std::vector<double> _trades;
 
 };
 
@@ -89,11 +128,11 @@ class TradeStatManager
         }
 
         tradeType += t.tradeType;
-        auto [it, inserted] = _tradeTypes.try_emplace(tradeType, TradeStats(tradeType)); 
+        auto [it, inserted] = _tradeTypes.try_emplace(tradeType, Trades(tradeType)); 
         it->second.addTrade(r);
     }
 
-    const TradeStats& getTradeStats(const std::string& label)
+    const Trades& getAllTrades()
     {
         return _allTrades;
     }
@@ -108,6 +147,6 @@ class TradeStatManager
     }
 
     private:
-    TradeStats _allTrades{"ALL"};
-    std::map<std::string, TradeStats> _tradeTypes;
+    Trades _allTrades{"ALL"};
+    std::map<std::string, Trades> _tradeTypes;
 };

@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
     TradeStatManager mgr;
     mgr.readTradeFile(file);
 
-    const auto& stats = mgr.getTradeStats("ALL");
-    ascii::Asciichart asciichart({{"ALLTRADES", mgr.getTradeStats("ALL").getTradesAsSeries()}});
+    const auto& stats = mgr.getAllTrades().getStats(150);
+    ascii::Asciichart asciichart({{"ALLTRADES", stats.getTradesAsSeries()}});
     std::cout << asciichart.Plot() << std::endl;
 
     auto tsCompare = [](const TradeStats &a, const TradeStats &b)
@@ -57,50 +57,45 @@ int main(int argc, char *argv[])
         double aR = a.getRunningR() / a.getTotalTrades();
         double bR = b.getRunningR() / b.getTotalTrades();
 
-        if(aR == bR && a.getRunningR() == b.getRunningR())
-        {
-            return a.getLabel() < b.getLabel();
-        }
-        else if(aR = bR)
-        {
-            return a.getRunningR() > b.getRunningR();
-        }
-        else
+        if(aR != bR)
         {
             return aR > bR;
         }
+
+        if(a.getRunningR() != b.getRunningR())
+        {
+            return a.getRunningR() > b.getRunningR();
+        }
+
+        return a.getLabel() < b.getLabel();
     };
 
     fort::char_table table;
     table << fort::header << "Trade Type" << "Total Trades" << "Win Pct" << "R/Trade" << "Total R"  << fort::endr;
 
     {
-        const auto &allTrades = mgr.getTradeStats("ALL");
+        const auto &allTrades = mgr.getAllTrades();
         double rPerTrade = stats.getRunningR() / stats.getTotalTrades();
-        table << stats.getLabel() << stats.getTotalTrades() << stats.getWinPct() << two_decimals(rPerTrade) << two_decimals(stats.getRunningR()) << fort::endr;
+        table << allTrades.getLabel() << stats.getTotalTrades() << stats.getWinPct() << two_decimals(rPerTrade) << two_decimals(stats.getRunningR()) << fort::endr;
     }
 
     std::set<TradeStats, decltype(tsCompare)> tsSet(tsCompare);
+
     
-    mgr.forEachTradeType([&tsSet](const TradeStats &stats)
-        { 
-            tsSet.insert(stats);
-        });
-
-
-    for(const auto& stats : tsSet)
-    {
-        if (!showAll)
+    mgr.forEachTradeType([showAll, &tsSet](const Trades &t)
         {
-            if (stats.getTotalTrades() < 10)
+            TradeStats ts = t.getStats(20);
+            if (showAll || ts.getTotalTrades() >= 10)
             {
-                continue;
+                tsSet.insert(ts);
             }
-        }
-        double rPerTrade = stats.getRunningR() / stats.getTotalTrades();
-        table << stats.getLabel() << stats.getTotalTrades() << stats.getWinPct() << two_decimals(rPerTrade) << two_decimals(stats.getRunningR()) << fort::endr;
-    };
+        });
+    
+    for(const auto& ts : tsSet)
+    {
+        double rPerTrade = ts.getRunningR() / ts.getTotalTrades();
+        table << ts.getLabel() << ts.getTotalTrades() << ts.getWinPct() << two_decimals(rPerTrade) << two_decimals(ts.getRunningR()) << fort::endr;
+    }
 
     std::cout << table.to_string() << std::endl;
-
 }
