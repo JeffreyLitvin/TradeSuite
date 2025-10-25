@@ -24,6 +24,7 @@ class TradeStats
         }
 
         _runningR += r;
+        _disciplinedTrades += t.discipline;
         _tradeR.push_back(_runningR);
     }
 
@@ -35,13 +36,19 @@ class TradeStats
         return (static_cast<double>(getWins()) / static_cast<double>(getTotalTrades())) * 100;  
     }
 
+    int getDisciplinedPct() const
+    {
+        return (static_cast<double>(_disciplinedTrades) / static_cast<double>(getTotalTrades())) * 100;  
+    }
+
     const std::vector<double>& getTradesAsSeries() const { return _tradeR;};
 
     private:
     std::string _label;
     std::vector<double> _tradeR;
-    int _wins        = 0;
-    double _runningR    = 0;
+    int _wins               = 0;
+    int _disciplinedTrades  = 0;
+    double _runningR        = 0;
 
 };
 
