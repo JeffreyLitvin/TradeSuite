@@ -88,17 +88,19 @@ class TradeStatManager
 
     void readTradeFile(std::string f)
     {
-        io::CSVReader<9> in(f);
+        io::CSVReader<10> in(f);
 
         int longTrade;
         int withTrend;
         double r;
         Trade t;
+        int discipline = 0;
 
-        while (in.read_row(t.sym, t.openDate, longTrade, withTrend, t.tradeType, t.risk, t.closeDate, t.pnl, r))
+        while (in.read_row(t.sym, t.openDate, longTrade, withTrend, t.tradeType, t.risk, t.closeDate, t.pnl, r, discipline))
         {
-            t.longTrade = longTrade;
-            t.withTrend = withTrend;
+            t.longTrade  = longTrade;
+            t.withTrend  = withTrend;
+            t.discipline = discipline;
             addTrade(t);
         }
     }

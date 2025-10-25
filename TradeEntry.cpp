@@ -109,7 +109,8 @@ void MenuMgr::trade2CSV(std::ostream &csv, const Trade &t)
                   << t.risk << ","
                   << t.closeDate << ","
                   << t.pnl << ","
-                  << rmultiple.str();
+                  << rmultiple.str() << ","
+                  << t.discipline; 
 }
 
 void MenuMgr::addTrade()

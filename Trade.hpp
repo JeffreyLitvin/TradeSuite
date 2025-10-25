@@ -13,4 +13,5 @@ struct Trade
     int pnl;
     std::string closeDate; 
     std::string tradeType; 
+    bool discipline = false;
 };
