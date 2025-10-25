@@ -15,8 +15,9 @@ class TradeStats
 
     std::string getLabel() const { return _label;}
 
-    void addTrade(double r)
+    void addTrade(Trade t)
     {
+        double r = static_cast<double>(t.pnl) / static_cast<double>(t.risk);
         if(r >= 0)
         {
             ++_wins;
@@ -53,9 +54,9 @@ class Trades
 
     std::string getLabel()const { return _label;}
 
-    void addTrade(double r)
+    void addTrade(Trade t)
     {
-        _trades.push_back(r);
+        _trades.push_back(t);
     }
 
     TradeStats getStats(int xMostRecent) const
@@ -78,7 +79,7 @@ class Trades
 
     private:
     std::string _label;
-    std::vector<double> _trades;
+    std::vector<Trade> _trades;
 
 };
 
@@ -107,8 +108,7 @@ class TradeStatManager
 
     void addTrade(Trade t)
     {
-        double r = static_cast<double>(t.pnl) / static_cast<double>(t.risk);
-        _allTrades.addTrade(r);
+        _allTrades.addTrade(t);
 
         std::string tradeType;
         if(t.longTrade)
@@ -131,7 +131,7 @@ class TradeStatManager
 
         tradeType += t.tradeType;
         auto [it, inserted] = _tradeTypes.try_emplace(tradeType, Trades(tradeType)); 
-        it->second.addTrade(r);
+        it->second.addTrade(t);
     }
 
     const Trades& getAllTrades()
