@@ -8,14 +8,13 @@
 
 #include <ctime>
 
-void addTrade();
-
 class MenuMgr
 {
     private:
     std::vector<Trade> _trades;
     bool isLongTrade();
     bool isWithTrend();
+    bool isDisciplined();
     std::string tradeType();
     void trade2CSV(std::ostream& os, const Trade& t);
 
@@ -125,6 +124,7 @@ void MenuMgr::addTrade()
     std::cout << "Risk: "; std::cin >> t.risk; 
     t.closeDate = getDate("CloseDate");
     std::cout << "PnL: "; std::cin >> t.pnl; 
+    t.discipline = isDisciplined();
 
     bool goodTrade = false;
 
@@ -228,6 +228,17 @@ bool MenuMgr::isWithTrend()
     bool b;
     menu.add_item("With trend", [&b]() {b = true;});
     menu.add_item("Counter trend", [&b]() {b = false;});
+    menu.print();
+
+    return b;
+}
+
+bool MenuMgr::isDisciplined()
+{
+    CubbyMenu::Menu menu;
+    bool b;
+    menu.add_item("Disciplined", [&b]() {b = true;});
+    menu.add_item("Not disciplined", [&b]() {b = false;});
     menu.print();
 
     return b;
