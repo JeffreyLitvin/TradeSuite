@@ -24,6 +24,17 @@ class TradeStats
         }
 
         _runningR += r;
+
+        if(_runningR > _hR)
+        {
+            _hR      = _runningR;
+            _hRCount = 0;
+        }
+        else
+        {
+            ++_hRCount;
+        }
+
         _disciplinedTrades += t.discipline;
         _tradeR.push_back(_runningR);
     }
@@ -43,12 +54,24 @@ class TradeStats
 
     const std::vector<double>& getTradesAsSeries() const { return _tradeR;};
 
+    double getDrawDown() const
+    {
+        return _hR - _runningR;
+    }
+
+    int getDrawDownTradeCount() const
+    {
+        return _hRCount;
+    }
+
     private:
     std::string _label;
     std::vector<double> _tradeR;
     int _wins               = 0;
     int _disciplinedTrades  = 0;
     double _runningR        = 0;
+    double _hR              = 0;
+    int _hRCount            = 0;
 
 };
 

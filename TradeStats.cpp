@@ -52,6 +52,12 @@ int main(int argc, char *argv[])
     ascii::Asciichart asciichart({{"ALLTRADES", stats.getTradesAsSeries()}});
     std::cout << asciichart.Plot() << std::endl;
 
+    int ddCount = stats.getDrawDownTradeCount();
+    if(ddCount > 0)
+    {
+        std::cout << "Drawdown: " << ddCount << " trades / "<< two_decimals(stats.getDrawDown()) << "R" << std::endl;
+    }
+
     auto tsCompare = [](const TradeStats &a, const TradeStats &b)
     {
         double aR = a.getRunningR() / a.getTotalTrades();
