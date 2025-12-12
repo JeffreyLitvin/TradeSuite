@@ -16,6 +16,8 @@ std::string two_decimals(double value) {
     return str.str(); 
 }
 
+void fullSummary(const TradeStatManager mgr, bool showAll);
+
 int main(int argc, char *argv[])
 {
     cxxopts::Options options("TradeStats", "Produces trade stats");
@@ -48,6 +50,13 @@ int main(int argc, char *argv[])
     TradeStatManager mgr;
     mgr.readTradeFile(file);
 
+    fullSummary(mgr, showAll);
+
+}
+
+
+void fullSummary(const TradeStatManager mgr, bool showAll)
+{
     const auto& stats = mgr.getAllTrades().getStats(150);
     ascii::Asciichart asciichart({{"ALLTRADES", stats.getTradesAsSeries()}});
     std::cout << asciichart.Plot() << std::endl;
@@ -104,4 +113,5 @@ int main(int argc, char *argv[])
     }
 
     std::cout << table.to_string() << std::endl;
+
 }

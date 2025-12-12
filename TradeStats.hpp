@@ -164,13 +164,13 @@ class TradeStatManager
         it->second.addTrade(t);
     }
 
-    const Trades& getAllTrades()
+    const Trades& getAllTrades() const
     {
         return _allTrades;
     }
 
     template<typename Func>
-    void forEachTradeType(Func fn)
+    void forEachTradeType(Func fn) const
     {
         for (const auto& pair : _tradeTypes) 
         {
