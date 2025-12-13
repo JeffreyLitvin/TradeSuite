@@ -17,6 +17,8 @@ std::string two_decimals(double value) {
     return str.str(); 
 }
 
+fort::char_table getStatsTable();
+void addStats(fort::char_table& table, const TradeStats& stats);
 void fullSummary(const TradeStatManager mgr, bool showAll);
 void tradeGraph(const TradeStats& stats);
 
@@ -60,6 +62,9 @@ int main(int argc, char *argv[])
       {
         auto stats = trades->getStats(150);
         tradeGraph(stats);
+        auto table = getStatsTable();
+        addStats(table, stats);
+        std::cout << table.to_string() << std::endl;
       }
     }
     else 
@@ -68,6 +73,23 @@ int main(int argc, char *argv[])
     }
 }
 
+
+fort::char_table getStatsTable()
+{
+    fort::char_table table;
+    table << fort::header << "Trade Type" << "Total Trades" << "Discipline Pct" << "Win Pct" << "R/Trade" << "Total R"  << fort::endr;
+    return table;
+}
+
+void addStats(fort::char_table& table, const TradeStats& stats)
+{
+  double rPerTrade = stats.getRunningR() / stats.getTotalTrades();
+  table << stats.getLabel() << stats.getTotalTrades()
+        << stats.getDisciplinedPct() << stats.getWinPct()
+        << two_decimals(rPerTrade) << two_decimals(stats.getRunningR())
+        << fort::endr;
+
+}
 
 void fullSummary(const TradeStatManager mgr, bool showAll)
 {
@@ -92,18 +114,10 @@ void fullSummary(const TradeStatManager mgr, bool showAll)
         return a.getLabel() < b.getLabel();
     };
 
-    fort::char_table table;
-    table << fort::header << "Trade Type" << "Total Trades" << "Discipline Pct" << "Win Pct" << "R/Trade" << "Total R"  << fort::endr;
-
-    {
-        const auto &allTrades = mgr.getAllTrades();
-        double rPerTrade = stats.getRunningR() / stats.getTotalTrades();
-        table << allTrades.getLabel() << stats.getTotalTrades() << stats.getDisciplinedPct() <<stats.getWinPct() << two_decimals(rPerTrade) << two_decimals(stats.getRunningR()) << fort::endr;
-    }
+    fort::char_table table = getStatsTable();
+    addStats(table, stats);
 
     std::set<TradeStats, decltype(tsCompare)> tsSet(tsCompare);
-
-    
     mgr.forEachTradeType([showAll, &tsSet](const Trades &t)
         {
             TradeStats ts = t.getStats(20);
@@ -115,12 +129,10 @@ void fullSummary(const TradeStatManager mgr, bool showAll)
     
     for(const auto& ts : tsSet)
     {
-        double rPerTrade = ts.getRunningR() / ts.getTotalTrades();
-        table << ts.getLabel() << ts.getTotalTrades() << ts.getDisciplinedPct() << ts.getWinPct() << two_decimals(rPerTrade) << two_decimals(ts.getRunningR()) << fort::endr;
+        addStats(table, ts);
     }
 
     std::cout << table.to_string() << std::endl;
-
 }
 
 void tradeGraph(const TradeStats& stats)
