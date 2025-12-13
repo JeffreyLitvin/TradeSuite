@@ -8,6 +8,7 @@
 #include "fort.hpp"
 #include <cmath>
 #include <set>
+#include <string>
 
 std::string two_decimals(double value) {
     std::stringstream str;
@@ -17,6 +18,7 @@ std::string two_decimals(double value) {
 }
 
 void fullSummary(const TradeStatManager mgr, bool showAll);
+void tradeGraph(const TradeStats& stats);
 
 int main(int argc, char *argv[])
 {
@@ -24,6 +26,7 @@ int main(int argc, char *argv[])
     options.add_options()
         ("f,file", "File name", cxxopts::value<std::string>())
         ("a,all", "Show all trades")
+        ("t,type", "Trade type", cxxopts::value<std::string>())
         ("h,help", "Print usage")
         ;
     auto result = options.parse(argc, argv);
@@ -50,22 +53,26 @@ int main(int argc, char *argv[])
     TradeStatManager mgr;
     mgr.readTradeFile(file);
 
-    fullSummary(mgr, showAll);
-
+    if (result.count("type"))
+    {
+      auto trades = mgr.getTrades(result["type"].as<std::string>());
+      if(trades.has_value())
+      {
+        auto stats = trades->getStats(150);
+        tradeGraph(stats);
+      }
+    }
+    else 
+    {
+      fullSummary(mgr, showAll);
+    }
 }
 
 
 void fullSummary(const TradeStatManager mgr, bool showAll)
 {
     const auto& stats = mgr.getAllTrades().getStats(150);
-    ascii::Asciichart asciichart({{"ALLTRADES", stats.getTradesAsSeries()}});
-    std::cout << asciichart.Plot() << std::endl;
-
-    int ddCount = stats.getDrawDownTradeCount();
-    if(ddCount > 0)
-    {
-        std::cout << "Drawdown: " << ddCount << " trades / "<< two_decimals(stats.getDrawDown()) << "R" << std::endl;
-    }
+    tradeGraph(stats);
 
     auto tsCompare = [](const TradeStats &a, const TradeStats &b)
     {
@@ -114,4 +121,16 @@ void fullSummary(const TradeStatManager mgr, bool showAll)
 
     std::cout << table.to_string() << std::endl;
 
+}
+
+void tradeGraph(const TradeStats& stats)
+{
+    ascii::Asciichart asciichart({{stats.getLabel(), stats.getTradesAsSeries()}});
+    std::cout << asciichart.Plot() << std::endl;
+
+    int ddCount = stats.getDrawDownTradeCount();
+    if(ddCount > 0)
+    {
+        std::cout << "Drawdown: " << ddCount << " trades / "<< two_decimals(stats.getDrawDown()) << "R" << std::endl;
+    }
 }

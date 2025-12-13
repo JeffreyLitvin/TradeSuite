@@ -1,5 +1,6 @@
  #pragma once
 
+#include <optional>
 #include <string>
 #include <map>
 #include <fstream>
@@ -176,6 +177,17 @@ class TradeStatManager
         {
             fn(pair.second);
         }
+    }
+
+    std::optional<Trades> getTrades(std::string type)
+    {
+      auto it = _tradeTypes.find(type);
+      if (it == _tradeTypes.end()) 
+      {
+        return std::nullopt;
+      }
+
+      return it->second;
     }
 
     private:
