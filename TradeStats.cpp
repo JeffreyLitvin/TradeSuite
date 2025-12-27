@@ -120,8 +120,8 @@ void fullSummary(const TradeStatManager mgr, bool showAll)
     std::set<TradeStats, decltype(tsCompare)> tsSet(tsCompare);
     mgr.forEachTradeType([showAll, &tsSet](const Trades &t)
         {
-            TradeStats ts = t.getStats(20);
-            if (showAll || ts.getTotalTrades() >= 10)
+            TradeStats ts = t.getStats(50);
+            if (showAll || ts.getTotalTrades() >= 20)
             {
                 tsSet.insert(ts);
             }
