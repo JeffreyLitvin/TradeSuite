@@ -9,6 +9,9 @@
 #include <cmath>
 #include <set>
 #include <string>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <algorithm>
 
 std::string two_decimals(double value) {
     std::stringstream str;
@@ -138,7 +141,11 @@ void fullSummary(const TradeStatManager mgr, bool showAll)
 void tradeGraph(const TradeStats& stats)
 {
     ascii::Asciichart asciichart({{stats.getLabel(), stats.getTradesAsSeries()}});
-    std::cout << asciichart.Plot() << std::endl;
+
+    struct winsize size;
+    ioctl(0, TIOCGWINSZ, &size);
+    int h = std::max(20, size.ws_row - 25);
+    std::cout << asciichart.height(h).Plot() << std::endl;
 
     int ddCount = stats.getDrawDownTradeCount();
     if(ddCount > 0)
